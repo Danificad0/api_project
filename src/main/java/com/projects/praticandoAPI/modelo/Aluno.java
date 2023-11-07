@@ -1,14 +1,20 @@
 package com.projects.praticandoAPI.modelo;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 
 @Entity
 public class Aluno {
+	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 	private int numeroCursosConcluidos;
 	private boolean isPremium;
     private int moedas;
 
-    public Aluno() {
+    public Aluno(Long id, int numeroCursosConcluidos,boolean isPremium, int moedas) {
+    	this.id = id;
         this.numeroCursosConcluidos = 0;
         this.isPremium = false;
         this.moedas = 0;
@@ -26,7 +32,18 @@ public class Aluno {
         }
     }
 
-    public boolean isPremium() {
+    public Aluno() {
+ 
+    }
+    public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public boolean isPremium() {
         return isPremium;
     }
 

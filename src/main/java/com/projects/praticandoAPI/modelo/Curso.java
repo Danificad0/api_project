@@ -20,6 +20,15 @@ public class Curso {
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
 		return result;
 	}
+	public Curso() {
+	   
+	}
+	public Curso(Long id, String nome, String categoria) {
+		super();
+		this.id = id;
+		this.nome = nome;
+		this.categoria = categoria;
+	}
 
 	@Override
 	public boolean equals(Object obj) {
