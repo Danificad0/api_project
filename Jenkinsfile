@@ -4,17 +4,13 @@ pipeline {
     stages {
         stage('Build and Deploy to Dev') {
             when {
-                branch 'dev'
+                expression { env.BRANCH_NAME == 'dev' }
             }
             steps {
                 script {
-                    // Clona o repositório ou realiza outras ações necessárias
+                    echo 'Building and deploying to Dev'
                     checkout scm
-                    
-                    // Compila o projeto Spring Boot
                     sh './mvnw clean package'
-                    
-                    // Atualiza a imagem do Docker para Dev
                     sh 'docker-compose -f docker-compose.yml -f docker-compose-dev.yml build'
                     sh 'docker-compose -f docker-compose.yml -f docker-compose-dev.yml up -d'
                 }
@@ -23,18 +19,15 @@ pipeline {
         
         stage('Test on Homolog') {
             when {
-                branch 'homol'
+                expression { env.BRANCH_NAME == 'homol' }
             }
             steps {
                 script {
-                    // Atualiza a imagem do Docker para Homolog
+                    echo 'Testing on Homolog'
                     sh 'docker-compose -f docker-compose.yml -f docker-compose-homolog.yml build'
                     sh 'docker-compose -f docker-compose.yml -f docker-compose-homolog.yml up -d'
-                    
-                    // Executa os testes e gera relatório JaCoCo
                     sh './mvnw test jacoco:report'
                     
-                    // Analisa o relatório JaCoCo e verifica a cobertura
                     def coverage = readFile 'target/site/jacoco/jacoco.xml'
                     def coveragePercentage = sh(script: 'echo $coverage | xmllint --xpath "//counter[@type=\'INSTRUCTION\']/@covered" -', returnStdout: true).trim()
                     
@@ -47,11 +40,11 @@ pipeline {
 
         stage('Promote to Production') {
             when {
-                branch 'main'
+                expression { env.BRANCH_NAME == 'main' }
             }
             steps {
                 script {
-                    // Atualiza a imagem do Docker para Produção
+                    echo 'Promoting to Production'
                     sh 'docker-compose -f docker-compose.yml -f docker-compose-production.yml build'
                     sh 'docker-compose -f docker-compose.yml -f docker-compose-production.yml up -d'
                 }
@@ -61,7 +54,6 @@ pipeline {
     
     post {
         failure {
-            // Ação a ser executada em caso de falha
             echo "Falha na construção ou nos testes. A branch não será promovida para produção."
         }
     }
