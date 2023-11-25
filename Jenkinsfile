@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Build and Deploy to Dev') {
             when {
-                expression { env.BRANCH_NAME == 'dev' }
+                env.BRANCH_NAME == 'dev'
             }
             steps {
                 script {
@@ -19,7 +19,7 @@ pipeline {
         
         stage('Test on Homolog') {
             when {
-                expression { env.BRANCH_NAME == 'homol' }
+              env.BRANCH_NAME == 'homol'
             }
             steps {
                 script {
@@ -40,7 +40,7 @@ pipeline {
 
         stage('Promote to Production') {
             when {
-                expression { env.BRANCH_NAME == 'main' }
+                env.BRANCH_NAME == 'main'
             }
             steps {
                 script {
