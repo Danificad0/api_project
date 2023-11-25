@@ -1,11 +1,16 @@
 package com.projects.praticandoAPI.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.projects.praticandoAPI.modelo.Aluno;
+import com.projects.praticandoAPI.repository.AlunoRepository;
 
 @Service
 public class AlunoService {
+	
+	@Autowired
+    private AlunoRepository alunoRepository;
 
 	 public void concluirCursoComMediaSuperiorASete(Aluno aluno) {
 	        aluno.setNumeroCursosConcluidos(aluno.getNumeroCursosConcluidos() + 1);
@@ -16,6 +21,7 @@ public class AlunoService {
 	        if (aluno.isPremium()) {
 	            aluno.setMoedas(aluno.getMoedas() + 3);
 	        }
+	        alunoRepository.save(aluno);
 	    }
 
     public void usarMoedas(Aluno aluno, int quantidade) {
