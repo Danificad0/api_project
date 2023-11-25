@@ -7,7 +7,7 @@ import javax.persistence.Id;
 
 @Entity
 public class Aluno {
-	@Id
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 	private int numeroCursosConcluidos;

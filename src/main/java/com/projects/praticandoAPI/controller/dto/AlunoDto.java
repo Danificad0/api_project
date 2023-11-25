@@ -12,6 +12,7 @@ public class AlunoDto {
     private int moedas;
 
     public AlunoDto(Aluno aluno) {
+    	this.id = aluno.getId();
         this.numeroCursosConcluidos = aluno.getNumeroCursosConcluidos();
         this.isPremium = aluno.isPremium();
         this.moedas = aluno.getMoedas();

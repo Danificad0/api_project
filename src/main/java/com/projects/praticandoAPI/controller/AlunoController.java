@@ -3,6 +3,8 @@ package com.projects.praticandoAPI.controller;
 import java.net.URI;
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -37,9 +39,8 @@ public class AlunoController {
     }
 
     @PostMapping
-    public ResponseEntity<AlunoDto> cadastrar(@RequestBody AlunoForm alunoForm, UriComponentsBuilder uriBuilder) {
-        Aluno aluno = alunoForm.converter(alunoRepository);
-        alunoRepository.save(aluno);
+    public ResponseEntity<AlunoDto> cadastrar(@RequestBody @Valid AlunoForm alunoForm, UriComponentsBuilder uriBuilder) {
+        Aluno aluno = alunoService.cadastrar(alunoForm);
 
         // Utilizando o AlunoService para manipular a lógica de negócios
         alunoService.concluirCursoComMediaSuperiorASete(aluno);
@@ -47,4 +48,5 @@ public class AlunoController {
         URI uri = uriBuilder.path("/aluno/{id}").buildAndExpand(aluno.getId()).toUri();
         return ResponseEntity.created(uri).body(new AlunoDto(aluno));
     }
+
 }
