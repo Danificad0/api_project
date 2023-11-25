@@ -4,65 +4,51 @@ pipeline {
     stages {
         stage('Build and Deploy to Dev') {
             when {
-                branch 'dev'
+                expression { env.BRANCH_NAME == 'dev' }
             }
             steps {
-                script {
-                    // Clona o repositório ou realiza outras ações necessárias
+                    echo 'Building and deploying to Dev'
                     checkout scm
-                    
-                    // Compila o projeto Spring Boot
-                    sh './mvnw clean package'
-                    
-                    // Atualiza a imagem do Docker para Dev
+                    sh 'mvn clean package'
                     sh 'docker-compose -f docker-compose.yml -f docker-compose-dev.yml build'
                     sh 'docker-compose -f docker-compose.yml -f docker-compose-dev.yml up -d'
-                }
             }
         }
         
         stage('Test on Homolog') {
             when {
-                branch 'homolog'
+                expression { env.BRANCH_NAME == 'homol' }
             }
             steps {
-                script {
-                    // Atualiza a imagem do Docker para Homolog
+
+                    echo 'Testing on Homolog'
                     sh 'docker-compose -f docker-compose.yml -f docker-compose-homolog.yml build'
                     sh 'docker-compose -f docker-compose.yml -f docker-compose-homolog.yml up -d'
+                    sh 'mvn test jacoco:report'
                     
-                    // Executa os testes e gera relatório JaCoCo
-                    sh './mvnw test jacoco:report'
+                    def coverage = readFile 'target/site/jacoco/jacoco.xml'
+                    def coveragePercentage = sh(script: 'echo $coverage | xmllint --xpath "//counter[@type=\'INSTRUCTION\']/@covered" -', returnStdout: true).trim()
+                    
+                    if (coveragePercentage.toInteger() < 90) {
+                        error "A cobertura de teste é inferior a 90%. A branch não será promovida para produção."
                 }
             }
         }
 
         stage('Promote to Production') {
             when {
-                branch 'main'
+                expression { env.BRANCH_NAME == 'main' }
             }
             steps {
-                script {
-                    def coverage = readFile 'target/site/jacoco/jacoco.xml'
-                    
-                    // Analisa o relatório JaCoCo e verifica a cobertura
-                    def coveragePercentage = sh(script: 'echo $coverage | xmllint --xpath "//counter[@type=\'INSTRUCTION\']/@covered" -', returnStdout: true).trim()
-                    
-                    if (coveragePercentage.toInteger() >= 90) {
-                        // Atualiza a imagem do Docker para Produção
-                        sh 'docker-compose -f docker-compose.yml -f docker-compose-production.yml build'
-                        sh 'docker-compose -f docker-compose.yml -f docker-compose-production.yml up -d'
-                    } else {
-                        error "A cobertura de teste é inferior a 90%. A branch não será promovida para produção."
-                    }
-                }
+                    echo 'Promoting to Production'
+                    sh 'docker-compose -f docker-compose.yml -f docker-compose-production.yml build'
+                    sh 'docker-compose -f docker-compose.yml -f docker-compose-production.yml up -d'
             }
         }
     }
     
     post {
         failure {
-            // Ação a ser executada em caso de falha
             echo "Falha na construção ou nos testes. A branch não será promovida para produção."
         }
     }
