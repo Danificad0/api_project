@@ -1,44 +1,34 @@
 package com.projects.praticandoAPI.controller.dto;
 
+import com.projects.praticandoAPI.modelo.Curso;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.projects.praticandoAPI.modelo.Curso;
-
 public class CursoDto {
-	private Long id;
-	private String nome;
-	private String categoria;
-	
-	
-	public CursoDto(Curso curso) {
-		super();
-		this.id = curso.getId();
-		this.nome = curso.getNome();
-		this.categoria = curso.getCategoria();
-	}
-	
-	public Long getId() {
-		return id;
-	}
-	public void setId(Long id) {
-		this.id = id;
-	}
-	public String getNome() {
-		return nome;
-	}
-	public void setNome(String nome) {
-		this.nome = nome;
-	}
-	public String getCategoria() {
-		return categoria;
-	}
-	public void setCategoria(String categoria) {
-		this.categoria = categoria;
-	}
-	
-	public static List<CursoDto> converter(List<Curso> cursos) {
-		return cursos.stream().map(CursoDto::new).collect(Collectors.toList());
-	}
-	
+    private Long id;
+    private String nome;
+    private double custo;
+
+    public CursoDto(Curso curso) {
+        this.id = curso.getId();
+        this.nome = curso.getNome();
+        this.custo = curso.getCusto();
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public double getCusto() {
+        return custo;
+    }
+
+    public static List<CursoDto> converter(List<Curso> cursos) {
+        return cursos.stream().map(CursoDto::new).collect(Collectors.toList());
+    }
 }

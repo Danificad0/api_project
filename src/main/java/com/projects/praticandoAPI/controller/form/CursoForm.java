@@ -1,37 +1,36 @@
 package com.projects.praticandoAPI.controller.form;
+
 import com.projects.praticandoAPI.modelo.Curso;
-import com.projects.praticandoAPI.repository.CursoRepository;
+
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 public class CursoForm {
-	private Long id;
-	private String nome;
-	private String categoria;
-	
-	
+    @NotNull
+    @NotEmpty
+    private String nome;
 
-	
-	public Long getId() {
-		return id;
-	}
-	public void setId(Long id) {
-		this.id = id;
-	}
-	public String getNome() {
-		return nome;
-	}
-	public void setNome(String nome) {
-		this.nome = nome;
-	}
-	public String getCategoria() {
-		return categoria;
-	}
-	public void setCategoria(String categoria) {
-		this.categoria = categoria;
-	}
-	
-	public Curso converter(CursoRepository cursoRepository) {
-		return new Curso(id, nome, categoria);
-	}
+    @NotNull
+    private double custo;
+
+    public CursoForm() {
+        // Construtor padrão
+    }
+
+    public CursoForm(String nome, double custo) {
+        this.nome = nome;
+        this.custo = custo;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public double getCusto() {
+        return custo;
+    }
+
+    public Curso converter() {
+        return new Curso(nome, custo);
+    }
 }
-	
-	
