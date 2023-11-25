@@ -17,31 +17,34 @@ import com.projects.praticandoAPI.controller.dto.AlunoDto;
 import com.projects.praticandoAPI.controller.form.AlunoForm;
 import com.projects.praticandoAPI.modelo.Aluno;
 import com.projects.praticandoAPI.repository.AlunoRepository;
-
-
-
+import com.projects.praticandoAPI.service.AlunoService;
 
 @RestController
+@RequestMapping("/alunos")
 @CrossOrigin
-@RequestMapping("/aluno")
-
 public class AlunoController {
+
     @Autowired
     private AlunoRepository alunoRepository;
-    
-    
+
+    @Autowired
+    private AlunoService alunoService; // Injetando o AlunoService
+
     @GetMapping
     public List<AlunoDto> lista() {
         List<Aluno> alunos = alunoRepository.findAll();
         return AlunoDto.converter(alunos);
     }
+
     @PostMapping
     public ResponseEntity<AlunoDto> cadastrar(@RequestBody AlunoForm alunoForm, UriComponentsBuilder uriBuilder) {
-        Aluno aluno = alunoForm.converter(alunoRepository); 
+        Aluno aluno = alunoForm.converter(alunoRepository);
         alunoRepository.save(aluno);
 
-        URI uri = uriBuilder.path("/aluno/{id}").buildAndExpand(aluno.getId()).toUri(); // Correção da criação da URI
-        return ResponseEntity.created(uri).body(new AlunoDto(aluno));
+        // Utilizando o AlunoService para manipular a lógica de negócios
+        alunoService.concluirCursoComMediaSuperiorASete(aluno);
 
-}
+        URI uri = uriBuilder.path("/aluno/{id}").buildAndExpand(aluno.getId()).toUri();
+        return ResponseEntity.created(uri).body(new AlunoDto(aluno));
+    }
 }

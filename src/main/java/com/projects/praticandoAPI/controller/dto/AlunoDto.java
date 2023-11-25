@@ -13,9 +13,8 @@ public class AlunoDto {
 
     public AlunoDto(Aluno aluno) {
         this.numeroCursosConcluidos = aluno.getNumeroCursosConcluidos();
-        this.isPremium = aluno.getPremium(isPremium);
+        this.isPremium = aluno.isPremium();
         this.moedas = aluno.getMoedas();
-        
     }
     
     public int getNumeroCursosConcluidos() {

@@ -7,34 +7,23 @@ import javax.persistence.Id;
 
 @Entity
 public class Aluno {
-	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+	@Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 	private int numeroCursosConcluidos;
 	private boolean isPremium;
     private int moedas;
 
-    public Aluno(Long id, int numeroCursosConcluidos,boolean isPremium, int moedas) {
-    	this.id = id;
-        this.numeroCursosConcluidos = 0;
-        this.isPremium = false;
-        this.moedas = 0;
-    }
-
-    public void concluirCursoComMediaSuperiorASete() {
-        numeroCursosConcluidos++;
-
-        if (isPremium && numeroCursosConcluidos % 1 == 0) {
-            moedas += 3;
-        }
-
-        if (numeroCursosConcluidos == 12) {
-            isPremium = true;
-        }
-    }
-
     public Aluno() {
  
     }
+    
+    public Aluno(int numeroCursosConcluidos, boolean isPremium, int moedas) {
+        this.numeroCursosConcluidos = numeroCursosConcluidos;
+        this.isPremium = isPremium;
+        this.moedas = moedas;
+    }
+    
     public Long getId() {
 		return id;
 	}
@@ -44,19 +33,11 @@ public class Aluno {
 	}
 
 	public boolean isPremium() {
-        return isPremium;
-    }
+	    return isPremium;
+	}
 
     public int getMoedas() {
         return moedas;
-    }
-
-    public void usarMoedas(int quantidade) {
-        if (moedas >= quantidade) {
-            moedas -= quantidade;
-        } else {
-            System.out.println("Moedas insuficientes.");
-        }
     }
 
     public boolean podeTrocarPorCriptomoeda() {
@@ -71,10 +52,7 @@ public class Aluno {
 	}
 
 	public void setPremium(boolean isPremium) {
-		this.isPremium = isPremium;
-	}
-	public boolean getPremium(boolean isPremium) {
-		return isPremium;
+	    this.isPremium = isPremium;
 	}
 
 	public void setMoedas(int moedas) {
