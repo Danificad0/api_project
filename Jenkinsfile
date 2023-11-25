@@ -2,61 +2,58 @@ pipeline {
     agent any
     
     stages {
-        stage('Build') {
-            steps {
-                // Clona o repositório ou realiza outras ações necessárias
-                checkout scm
-                
-                // Compila o projeto Spring Boot
-                sh './mvnw clean package'
-            }
-        }
-        
-        stage('Test') {
-            steps {
-                // Executa os testes e gera relatório JaCoCo
-                sh './mvnw test jacoco:report'
-            }
-        }
-
-        stage('Deploy to Dev') {
+        stage('Build and Deploy to Dev') {
             when {
                 branch 'dev'
             }
             steps {
-                // Atualiza a imagem do Docker para Dev
-                sh 'docker-compose -f docker-compose.yml -f docker-compose-dev.yml build'
-                sh 'docker-compose -f docker-compose.yml -f docker-compose-dev.yml up -d'
+                script {
+                    // Clona o repositório ou realiza outras ações necessárias
+                    checkout scm
+                    
+                    // Compila o projeto Spring Boot
+                    sh './mvnw clean package'
+                    
+                    // Atualiza a imagem do Docker para Dev
+                    sh 'docker-compose -f docker-compose.yml -f docker-compose-dev.yml build'
+                    sh 'docker-compose -f docker-compose.yml -f docker-compose-dev.yml up -d'
+                }
             }
         }
         
-        stage('Deploy to Homolog') {
+        stage('Test on Homolog') {
             when {
-                branch 'homolog'
+                branch 'homol'
             }
             steps {
-                // Atualiza a imagem do Docker para Homolog
-                sh 'docker-compose -f docker-compose.yml -f docker-compose-homolog.yml build'
-                sh 'docker-compose -f docker-compose.yml -f docker-compose-homolog.yml up -d'
+                script {
+                    // Atualiza a imagem do Docker para Homolog
+                    sh 'docker-compose -f docker-compose.yml -f docker-compose-homolog.yml build'
+                    sh 'docker-compose -f docker-compose.yml -f docker-compose-homolog.yml up -d'
+                    
+                    // Executa os testes e gera relatório JaCoCo
+                    sh './mvnw test jacoco:report'
+                    
+                    // Analisa o relatório JaCoCo e verifica a cobertura
+                    def coverage = readFile 'target/site/jacoco/jacoco.xml'
+                    def coveragePercentage = sh(script: 'echo $coverage | xmllint --xpath "//counter[@type=\'INSTRUCTION\']/@covered" -', returnStdout: true).trim()
+                    
+                    if (coveragePercentage.toInteger() < 90) {
+                        error "A cobertura de teste é inferior a 90%. A branch não será promovida para produção."
+                    }
+                }
             }
         }
 
-        stage('Deploy to Production') {
+        stage('Promote to Production') {
             when {
                 branch 'main'
             }
             steps {
-                def coverage = readFile 'target/site/jacoco/jacoco.xml'
-                
-                // Analisa o relatório JaCoCo e verifica a cobertura
-                def coveragePercentage = sh(script: 'echo $coverage | xmllint --xpath "//counter[@type=\'INSTRUCTION\']/@covered" -', returnStdout: true).trim()
-                
-                if (coveragePercentage.toInteger() >= 90) {
+                script {
                     // Atualiza a imagem do Docker para Produção
                     sh 'docker-compose -f docker-compose.yml -f docker-compose-production.yml build'
                     sh 'docker-compose -f docker-compose.yml -f docker-compose-production.yml up -d'
-                } else {
-                    error "A cobertura de teste é inferior a 90%. A branch não será promovida para produção."
                 }
             }
         }
