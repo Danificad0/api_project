@@ -13,7 +13,7 @@ public class Curso {
     
     private String nome;
     private double custo;
-
+    
     public Curso() {
         // Construtor padrão
     }
