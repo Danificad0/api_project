@@ -4,6 +4,6 @@ WORKDIR /praticandoAPI
 
 COPY target/praticandoAPI-0.0.1-SNAPSHOT.war /praticandoAPI/praticandoAPI-0.0.1-SNAPSHOT.war
 
-EXPOSE 8080
+EXPOSE 9090
 
 CMD java -XX:+UseContainerSupport -Xmx512m -jar praticandoAPI-0.0.1-SNAPSHOT.war
