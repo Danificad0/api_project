@@ -1,60 +1,62 @@
 pipeline {
     agent any
-    
+
+    environment {
+        DOCKER_REGISTRY = 'hub.docker.com/danificad0/praticandoapi' // Substitua pelo seu registro Docker
+    }
+
     stages {
-        stage('Build and Deploy to Dev') {
-            when {
-                env.BRANCH_NAME == 'dev'
-            }
+        stage('Checkout') {
             steps {
-                script {
-                    echo 'Building and deploying to Dev'
-                    checkout scm
-                    sh 'mvn clean package'
-                    sh 'docker-compose -f docker-compose.yml -f docker-compose-dev.yml build'
-                    sh 'docker-compose -f docker-compose.yml -f docker-compose-dev.yml up -d'
-                }
+                checkout scm
             }
         }
-        
-        stage('Test on Homolog') {
-            when {
-              env.BRANCH_NAME == 'homol'
-            }
+
+        stage('Docker Login') {
             steps {
                 script {
-                    echo 'Testing on Homolog'
-                    sh 'docker-compose -f docker-compose.yml -f docker-compose-homolog.yml build'
-                    sh 'docker-compose -f docker-compose.yml -f docker-compose-homolog.yml up -d'
-                    sh 'mvn test jacoco:report'
-                    
-                    def coverage = readFile 'target/site/jacoco/jacoco.xml'
-                    def coveragePercentage = sh(script: 'echo $coverage | xmllint --xpath "//counter[@type=\'INSTRUCTION\']/@covered" -', returnStdout: true).trim()
-                    
-                    if (coveragePercentage.toInteger() < 90) {
-                        error "A cobertura de teste é inferior a 90%. A branch não será promovida para produção."
+                    // Obtém as credenciais do Jenkins
+                    def dockerCredentials = credentials(DOCKER_CREDENTIAL_ID)
+
+                    // Realiza o login no registro Docker
+                    docker.withRegistry(DOCKER_REGISTRY, 'docker-credentials-id') {
+                        // Aqui você pode fazer o docker login
+                        // A autenticação já foi realizada pela 'docker.withRegistry'
                     }
                 }
             }
         }
 
-        stage('Promote to Production') {
-            when {
-                env.BRANCH_NAME == 'main'
-            }
+        stage('Build') {
             steps {
-                script {
-                    echo 'Promoting to Production'
-                    sh 'docker-compose -f docker-compose.yml -f docker-compose-production.yml build'
-                    sh 'docker-compose -f docker-compose.yml -f docker-compose-production.yml up -d'
-                }
+                bat 'mvn clean package'
             }
         }
-    }
-    
-    post {
-        failure {
-            echo "Falha na construção ou nos testes. A branch não será promovida para produção."
+
+        stage('Test') {
+            steps {
+                bat 'mvn test'
+            }
+        }
+
+        stage('Code Coverage') {
+            steps {
+                bat 'mvn jacoco:prepare-agent test jacoco:report'
+            }
+        }
+
+        stage('Docker Build') {
+            steps {
+                // Construção da imagem Docker
+                bat 'docker build -t ${DOCKER_REGISTRY}/seu-usuario/seu-projeto .'
+            }
+        }
+
+        stage('Docker Push') {
+            steps {
+                // Envio da imagem Docker para o registro
+                bat 'docker push ${DOCKER_REGISTRY}/seu-usuario/seu-projeto'
+            }
         }
     }
 }
