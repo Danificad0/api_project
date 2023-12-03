@@ -3,25 +3,24 @@ pipeline {
   stages {
     stage('Start container') {
       steps {
-	sh 'sleep 30'
-        sh 'docker compose -f docker-compose.stage.yml up -d --no-color --wait'
-        sh 'docker compose -f docker-compose.stage.yml ps'
+        bat 'timeout /nobreak 30' // Equivalente a 'sleep 30' no Windows
+        bat 'docker-compose -f docker-compose.stage.yml up -d --no-color --wait'
+        bat 'docker-compose -f docker-compose.stage.yml ps'
       }
     }
     stage('Wait for container') {
       steps {
-        sh 'sleep 15'
+        bat 'timeout /nobreak 15' // Equivalente a 'sleep 15' no Windows
       }
     }
     stage('Run tests against the container') {
       steps {
         script {
-          def containerIds = sh(returnStdout: true, script: 'docker compose -f docker-compose.stage.yml ps -q').trim().split('\n')
+          def containerIds = bat(script: 'docker-compose -f docker-compose.stage.yml ps -q', returnStatus: true).trim().split('\r\n')
           def desiredContainerId = containerIds[0] 
-          sh "docker exec '${desiredContainerId}' curl http://localhost:9090"
+          bat "docker exec ${desiredContainerId} curl http://localhost:9090"
         }
       }
     }
   }
-  
 }
