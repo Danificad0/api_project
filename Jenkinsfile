@@ -13,7 +13,8 @@ pipeline {
     }
     stage('Start container') {
       steps {
-        sh 'docker compose -f docker-compose.stage.yml up -d --no-color --wait'
+        // Removendo o nohup e use 'start'
+        sh 'start docker compose -f docker-compose.stage.yml up -d --no-color --wait'
         sh 'docker compose -f docker-compose.stage.yml ps'
       }
     }
