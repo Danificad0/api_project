@@ -1,26 +1,38 @@
 pipeline {
   agent any
   stages {
-    stage('Start container') {
+    stage("verify tooling") {
       steps {
-        bat 'timeout /nobreak 30' // Equivalente a 'sleep 30' no Windows
-        bat 'docker-compose -f docker-compose.stage.yml up -d --no-color --wait'
-        bat 'docker-compose -f docker-compose.stage.yml ps'
+        sh '''
+          docker version
+          docker info
+          docker compose version 
+          curl --version
+          jq --version
+        '''
       }
     }
-    stage('Wait for container') {
+    stage('Prune Docker data') {
       steps {
-        bat 'timeout /nobreak 15' // Equivalente a 'sleep 15' no Windows
+        sh 'docker system prune -a --volumes -f'
+      }
+    }
+    stage('Start container') {
+      steps {
+        sh 'docker compose up -d --no-color --wait'
+        sh 'docker compose ps'
       }
     }
     stage('Run tests against the container') {
       steps {
-        script {
-          def containerIds = bat(script: 'docker-compose -f docker-compose.stage.yml ps -q', returnStatus: true).trim().split('\r\n')
-          def desiredContainerId = containerIds[0] 
-          bat "docker exec ${desiredContainerId} curl http://localhost:9090"
-        }
+        sh 'curl http://localhost:3000/param?query=demo | jq'
       }
+    }
+  }
+  post {
+    always {
+      sh 'docker compose down --remove-orphans -v'
+      sh 'docker compose ps'
     }
   }
 }
