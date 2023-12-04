@@ -13,15 +13,9 @@ pipeline {
         }
         stage('Start container') {
             steps {
-                echo 'Starting containers...'
-                    bat 'docker-compose -f docker-compose.stage.yml up -d --no-color --wait'
-                    
-                    echo 'Printing logs of pipeline_homol-api_stage-1...'
+                    bat 'docker-compose -f docker-compose.stage.yml up'
                     bat 'docker-compose -f docker-compose.stage.yml logs pipeline_homol-api_stage-1'
-                    
-                    // A linha abaixo é opcional e será exibida no console Jenkins para indicar que está verificando logs
-                    echo 'Finished printing logs.'
-            }
+                  }
         }
         stage('Wait for container') {
             steps {
