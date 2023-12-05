@@ -14,12 +14,12 @@ pipeline {
         stage('Start container') {
             steps {
                     bat 'docker-compose -f docker-compose.stage.yml up'
-                    bat 'docker-compose -f docker-compose.stage.yml logs pipeline_homol-api_stage-1'
+               
                   }
         }
         stage('Wait for container') {
             steps {
-                bat 'timeout /nobreak /t 40 > nul'
+                bat 'timeout /nobreak /t 20 > nul'
             }
         }
         stage('Run tests against the container') {
