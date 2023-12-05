@@ -20,7 +20,7 @@ pipeline {
         }
         stage('Wait for container') {
             steps {
-                bat 'timeout /t 20'
+                bat 'timeout /t 20 /nobreak > null'
             }
         }
         stage('Run tests against the container') {
