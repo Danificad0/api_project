@@ -10,7 +10,7 @@ services:
     - db-volume:/var/lib/postgresql/data
 
   api_prod:
-    image: lelesd2m2s10/praticando-api
+    image: danificad0/praticandoapi
     environment:
       DB_HOST: database_prod
     ports:

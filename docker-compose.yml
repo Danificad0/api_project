@@ -1,8 +1,19 @@
 version: '3'
+
 services:
-  echo-server:
-    image: ealen/echo-server:latest
+  database_stage:
+    image: postgres
     environment:
-      - ENABLE__ENVIRONMENT=false
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: papi
+    volumes:
+    - db-volume:/var/lib/postgresql/data
+
+  api_stage:
+    image: danificad0/praticandoapi
+    environment:
+      DB_HOST: database_stage
     ports:
-      - 3000:80
+      - "9292:9090"
+volumes:
+  db-volume:
