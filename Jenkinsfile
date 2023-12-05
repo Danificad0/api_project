@@ -18,11 +18,7 @@ pipeline {
                
                   }
         }
-        stage('Wait for container') {
-            steps {
-                
-            }
-        }
+
         stage('Run tests against the container') {
             steps {
                 script {
